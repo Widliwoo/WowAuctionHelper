@@ -1,8 +1,10 @@
 package com.example.extractor;
 
-import com.example.extractor.dto.FileDto;
+import com.example.extractor.dto.ImportDto;
 import com.example.extractor.dto.RealmDto;
-import com.example.extractor.service.FileService;
+import com.example.extractor.entity.ImportStatus;
+import com.example.extractor.service.ImportService;
+import com.example.extractor.service.RealmFacade;
 import com.example.extractor.util.ChecksumUtills;
 import com.example.extractor.service.LuaExecutor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,35 +33,37 @@ public class WowAuctionExtractorScheduledImporter {
     private String accName;
 
     @Autowired
-    private FileService fileService;
+    private LuaExecutor luaExecutor;
 
     @Autowired
-    private LuaExecutor luaExecutor;
+    private RealmFacade realmFacade;
+
+    @Autowired
+    private ImportService importService;
 
     @Scheduled(fixedDelay = 1000 * 60 * 5)
     public void importData() throws Exception {
         File source = new File(buildFileNameFor(rootFolder, accName));
-        FileDto dto = calculateCheckSums(source);
-        boolean isRelevant = fileService.checkRelevance(dto);
+        ImportDto importDto = createImportFrom(source);
+        boolean isRelevant = importService.checkRelevanceFor(importDto);
         if (isRelevant) {
             List<RealmDto> realms = luaExecutor.importRealms();
+            realmFacade.saveRealms(realms, importDto);
         } else {
             log.info("#importData interrupted. Reason is: irrelevant file.");
         }
+        log.info("#importData execution completed.");
     }
 
-    private FileDto calculateCheckSums(File source) {
-        FileDto dto = new FileDto();
-        dto.setScanDate(LocalDateTime.now());
+    private ImportDto createImportFrom(File source) {
+        ImportDto dto = new ImportDto();
+        dto.setStartDate(LocalDateTime.now());
+        dto.setStatus(ImportStatus.STARTED);
         try {
             dto.setMd5(ChecksumUtills.md5(source));
             dto.setSha256(ChecksumUtills.sha256(source));
         } catch (IOException e) {
-            log.error(
-                    """
-                        WowAuctionExtractorScheduledImporter #calculateCheckSums cannot calculate sum for file: {}.
-                        Reason is: {}
-                    """,
+            log.error("WowAuctionExtractorScheduledImporter #calculateCheckSums cannot calculate sum for file: {}.Reason is: {}",
                     source.getAbsolutePath(),
                     e.getMessage());
             throw new RuntimeException(e);
