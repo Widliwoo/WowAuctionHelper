@@ -1,0 +1,8 @@
+<service>
+      <id>wow-helper-svc</id>
+      <name>wow-helper-svc</name>
+      <description>Auction price extractor for wow 335a + Auctionator</description>
+      <executable>C:\Program Files\Java\jre1.8.0_51\bin\java</executable>
+      <arguments>-jar "%BASE%\demo.jar"</arguments>
+      <logmode>rotate</logmode>
+</service>
