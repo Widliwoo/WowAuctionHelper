@@ -2,7 +2,8 @@ package com.example.extractor.service;
 
 import com.example.extractor.dto.ImportDto;
 import com.example.extractor.entity.Import;
-import com.example.extractor.repository.FileEntityRepository;
+import com.example.extractor.entity.ImportStatus;
+import com.example.extractor.repository.ImportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +16,7 @@ public class ImportService {
     private final PageRequest FIRST_BY_DATE =
             PageRequest.of(0, 1, Sort.Direction.DESC, Import.Fields.startDate);
     @Autowired
-    private FileEntityRepository importRepository;
+    private ImportRepository importRepository;
 
     public boolean checkRelevanceFor(ImportDto importDto) {
         Page<Import> page = importRepository.findAll(FIRST_BY_DATE);
@@ -23,7 +24,8 @@ public class ImportService {
             return true;
         }
         Import freshImport = page.iterator().next();
-        return !isEqualHashesFor(freshImport, importDto);
+        return !isEqualHashesFor(freshImport, importDto)
+                || !freshImport.getStatus().equals(ImportStatus.FINISHED);
     }
 
     private boolean isEqualHashesFor(Import imp, ImportDto dto) {

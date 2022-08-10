@@ -1,20 +1,26 @@
 package com.example.extractor.service;
 
+import com.example.extractor.LuaCodeContainer;
 import com.example.extractor.dto.RealmDto;
+import com.example.extractor.event.ImportFailedEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.lib.jse.JsePlatform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.List;
 
 @Service
+@Slf4j
 public class LuaExecutor {
 
     private static final String ACC_NAME_PLACEHOLDER = "${accountName}";
@@ -42,9 +48,14 @@ public class LuaExecutor {
     public List<RealmDto> importRealms() throws JsonProcessingException {
         Globals globals = JsePlatform.standardGlobals();
         globals.loadfile(auctionatorLuaPath).call();
-        globals.loadfile(getClass().getClassLoader().getResource("AuctionatorExporter.lua").getFile()).call();
-        String resultingJson = globals.load(String.format("return exportJson(%s)", DEFAULT_DB_VAR_NAME)).call().checkjstring();
-        return objectMapper.readValue(resultingJson, new TypeReference<List<RealmDto>>() {
-        });
+        globals.load(LuaCodeContainer.LUA_EXTRACTING_FUNCTIONS).call();
+        String resultingJson = globals.load(LuaCodeContainer.LUA_EXTRACT_DATA).call().checkjstring();
+            return objectMapper.readValue(resultingJson, new TypeReference<>() {
+            });
     }
+
+    public File getWowLuaFile() {
+        return new File(auctionatorLuaPath);
+    }
+
 }
