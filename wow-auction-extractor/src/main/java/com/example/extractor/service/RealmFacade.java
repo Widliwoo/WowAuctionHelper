@@ -28,10 +28,6 @@ public class RealmFacade {
     @Transactional
     public void saveRealms(List<RealmDto> realms, ImportDto importDto) {
         List<Price> prices = new ArrayList<>();
-        Import importEntity = new Import();
-        importEntity.setStartDate(importDto.getStartDate());
-        importEntity.setMd5(importDto.getMd5());
-        importEntity.setSha256(importEntity.getSha256());
         for (RealmDto realm : realms) {
             for (ProductDto product : realm.getProducts()) {
                 Price price = new Price();
@@ -41,8 +37,10 @@ public class RealmFacade {
                 prices.add(price);
             }
         }
+
         List<Price> priceList = priceRepository.saveAllAndFlush(prices);
-        importEntity.setPriceList(priceList);
-        importRepository.save(importEntity);
+        Import entity = importRepository.findById(importDto.getId()).get();
+        entity.setPriceList(priceList);
+        importRepository.save(entity);
     }
 }

@@ -14,18 +14,16 @@ import org.springframework.stereotype.Service;
 public class ImportService {
 
     private final PageRequest FIRST_BY_DATE =
-            PageRequest.of(0, 1, Sort.Direction.DESC, Import.Fields.startDate);
+            PageRequest.of(0, 2, Sort.Direction.DESC, Import.Fields.startDate);
     @Autowired
     private ImportRepository importRepository;
 
     public boolean checkRelevanceFor(ImportDto importDto) {
-        Page<Import> page = importRepository.findAll(FIRST_BY_DATE);
-        if (page.isEmpty()) {
+        Import entity = importRepository.findLastByStatus(ImportStatus.FINISHED);
+        if (entity == null) {
             return true;
         }
-        Import freshImport = page.iterator().next();
-        return !isEqualHashesFor(freshImport, importDto)
-                || !freshImport.getStatus().equals(ImportStatus.FINISHED);
+        return !isEqualHashesFor(entity, importDto);
     }
 
     private boolean isEqualHashesFor(Import imp, ImportDto dto) {

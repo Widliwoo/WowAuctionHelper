@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ImportDto {
 
+    private Long id;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private ImportStatus status;

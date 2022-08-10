@@ -23,7 +23,7 @@ public class ImportFinishedEventListener implements ApplicationListener<ImportFi
     public void onApplicationEvent(ImportFinishedEvent event) {
         log.info("#onApplicationEvent started.");
         ImportDto dto = event.getDto();
-        Import entity = importRepository.findOneByStartDate(dto.getStartDate());
+        Import entity = importRepository.findById(dto.getId()).get();
         entity.setEndDate(LocalDateTime.now());
         entity.setStatus(ImportStatus.FINISHED);
         importRepository.save(entity);

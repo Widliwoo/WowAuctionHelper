@@ -23,7 +23,7 @@ public class ImportCanceledEventListener implements ApplicationListener<ImportCa
     public void onApplicationEvent(ImportCanceledEvent event) {
         log.info("#onApplicationEvent canceling import...");
         ImportDto dto = event.getDto();
-        Import entity = importRepository.findOneByStartDate(dto.getStartDate());
+        Import entity = importRepository.findById(dto.getId()).get();
         entity.setStatus(ImportStatus.CANCELED);
         entity.setEndDate(LocalDateTime.now());
         importRepository.save(entity);

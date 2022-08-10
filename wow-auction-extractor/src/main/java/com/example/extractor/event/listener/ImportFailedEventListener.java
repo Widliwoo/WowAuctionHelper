@@ -23,7 +23,7 @@ public class ImportFailedEventListener implements ApplicationListener<ImportFail
     public void onApplicationEvent(ImportFailedEvent event) {
         log.info("#onApplicationEvent import failed.");
         ImportDto dto = event.getDto();
-        Import entity = importRepository.findOneByStartDate(dto.getStartDate());
+        Import entity = importRepository.findById(dto.getId()).get();
         entity.setStatus(ImportStatus.FAILED);
         entity.setEndDate(LocalDateTime.now());
         importRepository.save(entity);

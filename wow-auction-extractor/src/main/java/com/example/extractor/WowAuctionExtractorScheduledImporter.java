@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -56,16 +57,17 @@ public class WowAuctionExtractorScheduledImporter {
                 throw new RuntimeException(e);
             }
             realmFacade.saveRealms(realms, importDto);
+            eventPublisher.publishEvent(new ImportFinishedEvent(this, importDto));
         } else {
             eventPublisher.publishEvent(new ImportCanceledEvent(this, importDto));
             log.info("#importData interrupted. Reason is: irrelevant file.");
         }
-        eventPublisher.publishEvent(new ImportFinishedEvent(this, importDto));
         log.info("#importData execution completed.");
     }
 
     private ImportDto createImportFrom(File source) {
         ImportDto dto = new ImportDto();
+        dto.setStartDate(LocalDateTime.now());
         try {
             dto.setMd5(ChecksumUtills.md5(source));
             dto.setSha256(ChecksumUtills.sha256(source));

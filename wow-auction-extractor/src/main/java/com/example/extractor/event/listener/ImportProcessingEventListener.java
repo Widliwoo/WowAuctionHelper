@@ -21,7 +21,7 @@ public class ImportProcessingEventListener implements ApplicationListener<Import
     public void onApplicationEvent(ImportProcessingEvent event) {
         log.info("#onApplicationEvent processing import.");
         ImportDto dto = event.getDto();
-        Import entity = importRepository.findOneByStartDate(dto.getStartDate());
+        Import entity = importRepository.findById(dto.getId()).get();
         entity.setStatus(ImportStatus.PROCESSING);
         importRepository.save(entity);
         log.info("#onApplicationEvent finished.");
