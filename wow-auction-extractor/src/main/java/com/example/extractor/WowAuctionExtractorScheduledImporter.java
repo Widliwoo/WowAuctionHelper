@@ -43,14 +43,17 @@ public class WowAuctionExtractorScheduledImporter {
      */
     @Scheduled(fixedDelay = 1000 * 60 * 5)
     public void importData() {
-        File source = luaExecutor.getWowLuaFile();
-        ImportDto importDto = createImportFrom(source);
+        log.info("=====================================");
+        log.info("");
+        log.info("=====================================");
+        String sourceString = luaExecutor.getWowLuaFileContent();
+        ImportDto importDto = createImportFrom(sourceString);
         eventPublisher.publishEvent(new ImportStartedEvent(this, importDto));
         boolean isRelevant = importService.checkRelevanceFor(importDto);
         if (isRelevant) {
             List<RealmDto> realms = null;
             try {
-                realms = luaExecutor.importRealms();
+                realms = luaExecutor.importRealms(sourceString);
             } catch (JsonProcessingException e) {
                 eventPublisher.publishEvent(new ImportFailedEvent(this, importDto));
                 log.error("#importRealms error reading json. Reason is {}.", e.getMessage());
@@ -65,15 +68,14 @@ public class WowAuctionExtractorScheduledImporter {
         log.info("#importData execution completed.");
     }
 
-    private ImportDto createImportFrom(File source) {
+    private ImportDto createImportFrom(String source) {
         ImportDto dto = new ImportDto();
         dto.setStartDate(LocalDateTime.now());
         try {
             dto.setMd5(ChecksumUtills.md5(source));
             dto.setSha256(ChecksumUtills.sha256(source));
         } catch (IOException e) {
-            log.error("WowAuctionExtractorScheduledImporter #calculateCheckSums cannot calculate sum for file: {}.Reason is: {}",
-                    source.getAbsolutePath(),
+            log.error("WowAuctionExtractorScheduledImporter #calculateCheckSums cannot calculate sum for file.Reason is: {}",
                     e.getMessage());
             throw new RuntimeException(e);
         }

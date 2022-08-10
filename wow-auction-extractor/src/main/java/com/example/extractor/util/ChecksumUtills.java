@@ -15,4 +15,12 @@ public class ChecksumUtills {
     public static String sha256(File file) throws IOException {
         return DigestUtils.sha256Hex(Files.newInputStream(file.toPath()));
     }
+
+    public static String md5(String content) throws IOException {
+        return DigestUtils.md5Hex(content);
+    }
+
+    public static String sha256(String content) throws IOException {
+        return DigestUtils.sha256Hex(content);
+    }
 }
