@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ImportService {
 
@@ -28,5 +30,15 @@ public class ImportService {
 
     private boolean isEqualHashesFor(Import imp, ImportDto dto) {
         return imp.getMd5().equals(dto.getMd5()) && imp.getSha256().equals(dto.getSha256());
+    }
+
+    public List<Import> getUnsentImports() {
+        return importRepository.findAllBySentIsFalseAndStatusIs(ImportStatus.FINISHED);
+    }
+
+    public void setSent(Long importId) {
+        Import entity = importRepository.getReferenceById(importId);
+        entity.setSent(Boolean.TRUE);
+        importRepository.save(entity);
     }
 }

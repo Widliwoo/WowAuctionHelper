@@ -10,6 +10,9 @@ import javax.persistence.*;
 @Setter
 public class Price extends IdentifiableEntity {
 
+    /**
+     * Цена предмета, выраженная в медных монетах
+     */
     private Long productPrice;
     private String productName;
     private String realmName;
