@@ -14,6 +14,7 @@
 
     <modules>
         <module>wow-auction-extractor</module>
+        <module>auction-helper</module>
     </modules>
 
 </project>

@@ -1,0 +1,19 @@
+<html lang="ru"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+</head>
+<body>
+<h1>Список товаров. Всего <span th:text="${realms.size}">100500</span></h1>
+<div th:each="realm : ${realms}">
+    <h1>Товары реалма <span th:text="realm.name">TEST</span></h1>
+    <h2>Всего товаров: <span th:text="${realm.products.size}">-100</span></h2>
+    <ol>
+        <li th:each="product : ${realm.products}">
+            <span th:text="${product.name}">Test</span>
+        </li>
+    </ol>
+</div>
+</body>
+</html>
